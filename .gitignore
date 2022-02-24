@@ -2,3 +2,4 @@
 setup.sh
 heroku_sample*
 temp*
+auth_setup.sh

@@ -31,6 +31,7 @@ To run the server, execute:
 
 ```bash
 source setup.sh
+source auth_setup.sh  #To be able to use the jwt token for specific permissions
 python app.py
 ```
 
@@ -45,9 +46,21 @@ python test_flaskr.py
 ## API Reference
 
 ### Getting Started
-- Base URL: At present this app can only be run locally and is not hosted as a base URL. The backend app is hosted at the default, `http://127.0.0.1:5000/`,  
-- Authentication: Auth0 
+- Base URL: At present this app can only be run locally and is hosted using heroku. The backend app is hosted at the default, `http://127.0.0.1:5000/`,  
+- Authentication: Bearer token 
 
+### Authentication 
+- Using Auth0 and jwt tokens for authorization (Bearer token)
+- Roles:
+    - Casting Assistant
+          Can view actors and movies
+    - Casting Director
+          All permissions a Casting Assistant has and…
+          Add or delete an actor from the database
+          Modify actors or movies
+    - Executive Producer
+          All permissions a Casting Director has and…
+          Add or delete a movie from the database
 ### Error Handling
 Errors are returned as JSON objects in the following format:
 ```
@@ -58,6 +71,7 @@ Errors are returned as JSON objects in the following format:
 }
 ```
 The API will return three error types when requests fail:
+- 401: Lacks valid authentication
 - 404: Resource Not Found
 - 405: Method Not Allowed 
 
@@ -65,7 +79,12 @@ The API will return three error types when requests fail:
 #### GET /actors
 - General:
     - Return a list of actors
-- Sample: `curl http://127.0.0.1:5000/actors`
+- Who can make this request:
+  Users with these roles
+    - Casting Assistant
+    - Casting Director
+    - Executive Producer
+- Sample: `curl -H "Authorization: Bearer ${Token}" http://127.0.0.1:5000/actors`
 
 ``` {
     "actors": [
@@ -104,219 +123,150 @@ The API will return three error types when requests fail:
     ]
 }
 ```
+### GET /movies
+- General : 
+    - return a list of movies
+- Who can make this request:
+  Users with these roles
+    - Casting Assistant
+    - Casting Director
+    - Executive Producer
+### GET /plays
+- General :
+    - return a list of plays
+- Who can make this request:
+  Users with these roles
+    - Casting Assistant
+    - Casting Director
+    - Executive Producer
 
-### GET /questions/{page_id}
+### GET /movies/{movies_id}
 - General:
-    - Returns a list of questions objects, totalQuestions, categories and current category
-    - Results are paginated in groups of 10. Include a request argument to choose page number, starting from 1.
-`curl http://127.0.0.1:5000/questions/1` 
-
+    - Returns a detailed information about the movie with id 1
+- Who can make this request:
+  Users with these roles
+    - Casting Assistant
+    - Casting Director
+    - Executive Producer
+- Sample: `curl -H "Authorization: Bearer ${Token}" http://127.0.0.1:5000/movies/1` 
+- Note: `Token` is equal to the token mentioned in the test_app.py
 ```
 {
-  "categories": [
-    {
-      "id": 1,
-      "type": "Science"     
-    },
-    {
-      "id": 2,
-      "type": "Art"
-    },
-    {
-      "id": 3,
-      "type": "Geography"   
-    },
-    {
-      "id": 4,
-      "type": "History"     
-    },
-    {
-      "id": 5,
-      "type": "Entertainment"
-    },
-    {
-      "id": 6,
-      "type": "Sports"      
-    }
-  ],
-  "currentCategory": "Science",
-  "question": [
-    {
-      "answer": "Muhammad Ali",
-      "category": 4,        
-      "difficulty": 1,      
-      "id": 9,
-      "question": "What boxer's original name is Cassius Clay?"
-    },
-    {
-      "answer": "Tom Cruise",
-      "category": 5,        
-      "difficulty": 4,      
-      "id": 4,
-      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
-    },
-    {
-      "answer": "Edward Scissorhands",
-      "category": 5,        
-      "difficulty": 3,      
-      "id": 6,
-      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
-    },
-    {
-      "answer": "Brazil",   
-      "category": 6,        
-      "difficulty": 3,      
-      "id": 10,
-      "question": "Which is the only team to play in every soccer World Cup tournament?"
-    },
-    {
-      "answer": "Uruguay",  
-      "category": 6,        
-      "difficulty": 4,      
-      "id": 11,
-      "question": "Which country won the first ever soccer World Cup in 1930?"      
-    },
-    {
-      "answer": "George Washington Carver",
-      "category": 4,        
-      "difficulty": 2,      
-      "id": 12,
-      "question": "Who invented Peanut Butter?"
-    },
-    {
-      "answer": "Lake Victoria",
-      "category": 3,        
-      "difficulty": 2,      
-      "id": 13,
-      "question": "What is the largest lake in Africa?" 
-    },
-    {
-      "answer": "The Palace of Versailles",
-      "category": 3,        
-      "difficulty": 3,      
-      "id": 14,
-      "question": "In which royal palace would you find the Hall of Mirrors"       
-    },
-    {
-      "answer": "Agra",     
-      "category": 3,        
-      "difficulty": 2,      
-      "id": 15,
-      "question": "The Taj Mahal is located in which Indian city?"
-    },
-    {
-      "answer": "Jackson Pollock",
-      "category": 2,        
-      "difficulty": 2,      
-      "id": 19,
-      "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
-    }
-  ],
-  "totalQuestions": 28      
+    "estimated_project_time": 60,
+    "id": 1,
+    "name": "fast",
+    "need_actors": true
 }
 ```
-    
-### GET /categories/{question_id}/questions
+### GET /actors/{actors_id}
+- General :
+    - Return a detailed information about the actor with id actors_id
+- Who can make this request:
+  Users with these roles
+    - Casting Assistant
+    - Casting Director
+    - Executive Producer   
+### POST /actors
 - General:
-    - Returns a list of questions objects that have same category, totalQuestions, and current category
-`curl http://127.0.0.1:5000/categories/1/questions`
-
-``` {
-  "currentCategory": "Science",
-  "questions": [
-    {
-      "answer": "The Liver",
-      "category": 1,        
-      "difficulty": 4,      
-      "id": 20,
-      "question": "What is the heaviest organ in the human body?"
-    },
-    {
-      "answer": "Alexander Fleming",
-      "category": 1,        
-      "difficulty": 3,      
-      "id": 21,
-      "question": "Who discovered penicillin?"
-    },
-    {
-      "answer": "Blood",    
-      "category": 1,        
-      "difficulty": 4,      
-      "id": 22,
-      "question": "Hematology is a branch of medicine involving the study of what?" 
-    }
-  ],
-  "totalQuestions": 28      
-}
-```
-### POST /quizzes
-- General:
-  - Check the category choosed and not in previous questions. Returns success and questions related to that category
-` curl -X POST -H "Content-Type: application/json" -d '{"previous_questions":[19],"category":1}' http://127.0.0.1:5000/quizzes`
+  - Add an actor 
+- Who can make this request:
+  Users with these roles
+    - Casting Director
+    - Executive Producer
+- Sample: `curl -X POST -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -d '{"name":"chriss","age":20,"career":"drama","projects":"c","experience":0}' http://127.0.0.1:5000/actors`
 ```
 {
-  "question": [
-    {
-      "answer": "The Liver",
-      "category": 1,
-      "difficulty": 4,
-      "id": 20,
-      "question": "What is the heaviest organ in the human body?"       
-    },
-    {
-      "answer": "Alexander Fleming",
-      "category": 1,
-      "difficulty": 3,
-      "id": 21,
-      "question": "Who discovered penicillin?"
-    },
-    {
-      "answer": "Blood",
-      "category": 1,
-      "difficulty": 4,
-      "id": 22,
-      "question": "Hematology is a branch of medicine involving the study of what?"
-    },
-    {
-      "answer": "fine",
-      "category": 1,
-      "difficulty": 1,
-      "id": 38,
-      "question": "How are you"
-    },
-    {
-      "answer": null,
-      "category": 1,
-      "difficulty": null,
-      "id": 39,
-      "question": null
-    }
-  ],
-  "success": true
+  "actor_added": {
+    "age": 20,
+    "career": "drama",
+    "experience": 0,
+    "id": 19,
+    "name": "chriss",
+    "projects": "c"
+  }
 }
 ```
-
-
-### POST /questions
+### POST /movies
 - General:
-  - Creates a new question using the submitted question, answer, difficulty and category. Returns success value.
-`  curl -X POST -H "Content-Type: application/json" -d '{"question":"How are you", "answer":"fine", "difficulty":1,"category":1}' http://127.0.0.1:5000/questions `
-```
+  - Creates a new movie
+- Who can make this request:
+  Users with these roles
+    - Executive Producer
+- Sample: `curl -X POST -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -d '{"name":"original","estimated_project_time":70,"need_actors":true}' http://127.0.0.1:5000/movies`
+
 {
-  "success": true
+  "movie_added": {
+    "estimated_project_time": 70,
+    "id": 9,
+    "name": "original",
+    "need_actors": true
+  }
 }
-```
-
-### DELETE /questions/{question_id}
+### POST /plays
+- General 
+  - Creates a new play using an existing id in movies and actors
+- Who can make this request:
+  Users with these roles
+    - Executive Producer
+### DELETE /actors/{actors-id}
 - General:
-  - delete a question by its id. Return a succes value and the id of the question deleted
-`curl -X DELETE http://127.0.0.1:5000/questions/29 `
+  - delete an actor by its id. Return the id of the actor deleted
+- Who can make this request:
+  Users with these roles
+    - Casting Director
+    - Executive Producer
+- Sample: `curl -X DELETE -H "Authorization: Bearer ${token}" http://127.0.0.1:5000/actors/2`
 ``` 
   {
-  "deleted_id": 29,
-  "success": true
+  "deleted_id": 2,
 }
 ```
+### DELETE /movies/{movies-id}
+- General:
+  - delete a movie by its id. Return the id of the movie deleted
+- Who can make this request:
+  Users with these roles
+    - Executive Producer
+
+### DELETE /plays/{plays-id}
+- General:
+  - delete a play by its id. Return the id of the play deleted
+- Who can make this request:
+  Users with these roles
+    - Executive Producer
+
+### PATCH /movies/{movies-id}
+- General:
+  - edit the informations of a movie
+- Who can make this request:
+  Users with these roles
+    - Casting Director
+    - Executive Producer
+- Sample: `curl -X PATCH -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -d '{"name":"originals","estimated_project_time":50,"need_actors":false}' http://127.0.0.1:5000/movies/1`
+```
+{
+  "updated_movie": {
+    "estimated_project_time": 60,
+    "id": 1,
+    "name": "originals",
+    "need_actors": false
+  }
+}
+```
+### PATCH /actors/{actors-id}
+- General:
+  - edit the informations of an actor
+- Who can make this request:
+  Users with these roles
+    - Casting Director
+    - Executive Producer
+### PATCH /plays/{plays-id}
+- General:
+  - edit the informations of a play
+- Who can make this request:
+  Users with these roles
+    - Executive Producer
+
 ## Deplpyment N/A
 
 ## Authors
