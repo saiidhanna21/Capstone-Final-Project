@@ -2,6 +2,7 @@ from operator import ne
 import os
 from flask import Flask,json,jsonify,abort,request
 import sqlalchemy
+from auth import requires_auth
 from models import Actor, Movie, Play,setup_db,db
 from flask_cors import CORS
 import sys
@@ -19,9 +20,10 @@ def create_app(test_config=None):
         if excited == 'true': 
             greeting = greeting + "!!!!! You are doing great in this Udacity project."
         return greeting
-
+   
     @app.route('/actors')
-    def get_actor():
+    @requires_auth('get:actors')
+    def get_actor(payload):
         try:
             data = Actor.query.order_by('id').all()
             actors = [actor.format() for actor in data]
@@ -30,9 +32,10 @@ def create_app(test_config=None):
             })
         except Exception:
             abort(401)
-    
+
     @app.route('/actors/<int:actors_id>')
-    def get_actor_byId(actors_id):
+    @requires_auth('get:actors')
+    def get_actor_byId(payload,actors_id):
         try:
             actor = Actor.query.filter(Actor.id==actors_id).one_or_none()
             return jsonify({
@@ -45,9 +48,9 @@ def create_app(test_config=None):
             })
         except AttributeError:
             abort(404)
-    
     @app.route('/actors',methods=['POST'])
-    def add_actors():
+    @requires_auth('post:actors')
+    def add_actors(payload):
         body = request.get_json()
         try:
             new_name = body.get('name')
@@ -71,7 +74,8 @@ def create_app(test_config=None):
             abort(405)
     
     @app.route('/actors/<int:id>',methods=['DELETE'])
-    def delete_actor(id):
+    @requires_auth('delete:actors')
+    def delete_actor(payload,id):
         try:
             actor = Actor.query.filter(Actor.id==id).one_or_none()
             actor.delete()            
@@ -87,7 +91,8 @@ def create_app(test_config=None):
             abort(405)
     
     @app.route('/actors/<int:actor_id>',methods=['PATCH'])
-    def actor_update(actor_id):
+    @requires_auth('patch:actors')
+    def actor_update(payload,actor_id):
         body = request.get_json()
         try:
             actor = Actor.query.filter(Actor.id==actor_id).first()
@@ -109,9 +114,9 @@ def create_app(test_config=None):
             Actor.rollback()
             abort(405)
 
-
     @app.route('/movies')
-    def get_movies():
+    @requires_auth('get:movies')
+    def get_movies(payload):
         try:
             data = Movie.query.order_by('id').all()
             movies = [movie.format() for movie in data]
@@ -122,7 +127,8 @@ def create_app(test_config=None):
             abort(401)
     
     @app.route('/movies/<int:movie_id>')
-    def get_movie_byId(movie_id):
+    @requires_auth('get:movies')
+    def get_movie_byId(payload,movie_id):
         try:
             movie = Movie.query.filter(Movie.id==movie_id).one_or_none()
             return jsonify({
@@ -135,7 +141,8 @@ def create_app(test_config=None):
             abort(404)
     
     @app.route('/movies',methods=['POST'])
-    def add_movies():
+    @requires_auth('post:movies')
+    def add_movies(payload):
         body = request.get_json()
         try:
             new_name = body.get('name')
@@ -155,9 +162,10 @@ def create_app(test_config=None):
         except Exception:
             Movie.rollback()
             abort(405)
-            
-    @app.route('/movies/<int:id>',methods=['DELETE'])
-    def delete_movie(id):
+    
+    @app.route('/movies/<int:id>',methods=['DELETE'])        
+    @requires_auth('delete:movies')
+    def delete_movie(payload,id):
         try:
             movie = Movie.query.filter(Movie.id==id).one_or_none()
             movie.delete()            
@@ -171,9 +179,10 @@ def create_app(test_config=None):
         except Exception:
             Movie.rollback()
             abort(405)
-
+    
     @app.route('/movies/<int:movie_id>',methods=['PATCH'])
-    def movie_update(movie_id):
+    @requires_auth('patch:movies')
+    def movie_update(payload,movie_id):
         body = request.get_json()
         try:
             movie = Movie.query.filter(Movie.id==movie_id).first()
@@ -183,7 +192,7 @@ def create_app(test_config=None):
             
             Movie.update(movie)
             return jsonify({
-                "updated_actor":movie.format(),
+                "updated_movie":movie.format(),
             })
         except AttributeError:
             Movie.rollback()
@@ -194,10 +203,11 @@ def create_app(test_config=None):
             abort(405)
 
     @app.route('/plays')
-    def get_plays():
+    @requires_auth('get:plays')
+    def get_plays(payload):
         try:
             data = db.session.query(Play,Actor,Movie).join(Actor,Movie).order_by('id').all()
-            plays = [{"movie_id":play.Movie.id,"actor_id":play.Actor.id} for play in data]
+            plays = [{"id":play.Play.id,"movie_id":play.Movie.id,"actor_id":play.Actor.id} for play in data]
             return jsonify({
                 "plays":plays,
             })
@@ -206,7 +216,8 @@ def create_app(test_config=None):
             abort(401)
     
     @app.route('/plays',methods=['POST'])
-    def add_play():
+    @requires_auth('post:plays')
+    def add_play(payload):
         body = request.get_json()
         try:
             new_movie_id = body.get('movies_id')
@@ -229,13 +240,18 @@ def create_app(test_config=None):
             abort(405)
 
     @app.route('/plays/<int:id>',methods=['PATCH'])
-    def update_plays(id):
+    @requires_auth('patch:plays')
+    def update_plays(payload,id):
         body = request.get_json()
         try:
             play = db.session.query(Play,Actor,Movie).join(Actor,Movie).filter(Play.id==id).first()
             play.movies_id = body.get('movie_id')
             play.actors_id = body.get('actor_id')
             Play.update(play)
+
+            return jsonify({
+                'success':True,
+            })
                 
         except AttributeError:
             Play.rollback()
@@ -246,7 +262,8 @@ def create_app(test_config=None):
             abort(405)  
     
     @app.route('/plays/<int:id>',methods=['DELETE'])
-    def delete_plays(id):
+    @requires_auth('delete:plays')
+    def delete_plays(payload,id):
         try:
             play = Play.query.filter(Play.id==id).one_or_none()
             play.delete()
