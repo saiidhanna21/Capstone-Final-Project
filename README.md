@@ -46,7 +46,7 @@ python test_flaskr.py
 ## API Reference
 
 ### Getting Started
-- Base URL: At present this app can only be run locally and is hosted using heroku. The backend app is hosted at the default, `http://127.0.0.1:5000/`,  
+- Base URL: At present this app can be run locally and is hosted using heroku. The backend app is hosted at the default, `http://127.0.0.1:5000/`,  
 - Authentication: Bearer token 
 
 ### Authentication 

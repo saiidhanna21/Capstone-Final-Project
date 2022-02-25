@@ -9,11 +9,9 @@ from auth import requires_auth
 from app import create_app
 from models import setup_db, Actor, Movie, Play
 
-
-assistant_token='eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InhIYm42LWNSSEtSX0ZjekkwLWp6ZiJ9.eyJpc3MiOiJodHRwczovL2Rldi1mODFpbXlyZC51cy5hdXRoMC5jb20vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMDEzNjE4OTE1ODEzNDU1NjQxODIiLCJhdWQiOiJDYXBzdG9uZSIsImlhdCI6MTY0NTcxNTc3NiwiZXhwIjoxNjQ1ODAyMTc2LCJhenAiOiJud1gySVlDYlU0a2lhM1BRNEFsb0JIZUgyV1IzQmREOSIsInNjb3BlIjoiIiwicGVybWlzc2lvbnMiOlsiZ2V0OmFjdG9ycyIsImdldDptb3ZpZXMiLCJnZXQ6cGxheXMiXX0.maA6ih9gtJGt89UvtNieeTzoT_VsFQaR3tqnEkvYNmDBRtgIHEYDTziGGqzSJCmN7xpOTUDfBnsDOnVG0QhrleTP7vkHV15dh0AlIg8FFp0f_Q33T7InZmqcJbPGdS2qNFPskrVaGCk-eoyMb3jC6hyJIxczbCCBoj8_dyaGZyfRBuxir4qv_7485_2HZnQhybgSLnGynYhZ-wRBhBFkVbWRDWKQza2FTuh4SYEcC8vE_u0PLAzxJpQ-4sDqXlY4FgD6Fwy5k9XdA331iZ0-tA8buwgY3air-tNq4xZidaJaeoW7tpsGKY9dM4WYUQxzgtulFuFOTBCqWlGl7dCI8w'
-director_token='eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InhIYm42LWNSSEtSX0ZjekkwLWp6ZiJ9.eyJpc3MiOiJodHRwczovL2Rldi1mODFpbXlyZC51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjFmZmNlNDE0M2ZiNjcwMDY5YmFmYTg5IiwiYXVkIjoiQ2Fwc3RvbmUiLCJpYXQiOjE2NDU3MjkxMTcsImV4cCI6MTY0NTgxNTUxNywiYXpwIjoibndYMklZQ2JVNGtpYTNQUTRBbG9CSGVIMldSM0JkRDkiLCJzY29wZSI6IiIsInBlcm1pc3Npb25zIjpbImRlbGV0ZTphY3RvcnMiLCJnZXQ6YWN0b3JzIiwiZ2V0Om1vdmllcyIsImdldDpwbGF5cyIsInBhdGNoOmFjdG9ycyIsInBvc3Q6YWN0b3JzIl19.lhBCEnQXb2_OOmuQ-kJUOQT4zQJ9BfDSxfiTMJVd9KVEgkmV0hVwj1QL0m6t75FeYhiKqzmRvLKSCuzOf84jNFzeC1xFVu4mRMnJeOTenwuHkE8qlShNjA2cOpGmjb8hxPX8SESfvVPf_fIRW1q9kXrFf4xpzkDXTE6sLkk5FUv55DYE6VefkF2wdbS1ZmRLAf-xHTySyS36wcCxpBTvUXb9gHcSD8GQZ6iQqY4DogyY4IZxMbtNB7-9ElhHtvuo6vaRZTAPIZj2h6eQ6Fyp-ReGQ660KmD6ZqUiwc9j0WdDhgHjQRbW3vxOVVQX5fWyqZDB5xu45_koppD7QNjLnA'
-producer_token='eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InhIYm42LWNSSEtSX0ZjekkwLWp6ZiJ9.eyJpc3MiOiJodHRwczovL2Rldi1mODFpbXlyZC51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjIxNzkxNjBjMjQyNzIwMDcwNjE5NTMxIiwiYXVkIjoiQ2Fwc3RvbmUiLCJpYXQiOjE2NDU3MjkyMTcsImV4cCI6MTY0NTgxNTYxNywiYXpwIjoibndYMklZQ2JVNGtpYTNQUTRBbG9CSGVIMldSM0JkRDkiLCJzY29wZSI6IiIsInBlcm1pc3Npb25zIjpbImRlbGV0ZTphY3RvcnMiLCJkZWxldGU6bW92aWVzIiwiZGVsZXRlOnBsYXlzIiwiZ2V0OmFjdG9ycyIsImdldDptb3ZpZXMiLCJnZXQ6cGxheXMiLCJwYXRjaDphY3RvcnMiLCJwYXRjaDptb3ZpZXMiLCJwYXRjaDpwbGF5cyIsInBvc3Q6YWN0b3JzIiwicG9zdDptb3ZpZXMiLCJwb3N0OnBsYXlzIl19.XlqNuJXuDzAddCvOnDk4qy7L1e9Txglefj1EIfwU366t2BMlswHmBsIQcIXVqlA3WRqMgr37fnlmSp6mD9SJURy6HxwIowYj1_lkUEIA612RRvwNkKKWO8ypZrGlV-VyRF7Xf28wFqrpe4apYODOxNCDzV7rYEQzyfho-x-_QyPvus5Qcrz6H1mfMFvbEx9GbGCnxiBmXRpXPLigB_4MUZGhqB5RzXg7QJUGfO5bela6FHkEO7f5x4_R55ZY8uLMw7p_TtV5_jNY8azTKowx-LzeG97_dFG3yOnqW4nSjKLbaouH-F71-vb9q2ZOT_9sVsLjaqL9yOrE6FU3P9RpfQ'
-
+assistant_token = os.environ['assistant_token']
+director_token = os.environ['director_token']
+producer_token = os.environ['producer_token']
 assistant_header={
     'Authorization':'Bearer {}'.format(assistant_token)
 } 
@@ -304,14 +302,14 @@ class CapstonProjectTestCase(unittest.TestCase):
         self.assertEqual(data['success'],False)
     
     def test_edit_Plays(self):
-        res = self.client().patch('/plays/16',headers=producer_header,json={"movie_id":1,"actor_id":2})
+        res = self.client().patch('/plays/17',headers=producer_header,json={"movie_id":1,"actor_id":1})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code,200)
         self.assertEqual(data['success'],True)
     
     def test_edit_Plays_method_error(self):
-        res = self.client().post('/plays/4',headers=director_header)
+        res = self.client().post('/plays/17',headers=director_header)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code,405)
@@ -320,7 +318,7 @@ class CapstonProjectTestCase(unittest.TestCase):
         self.assertEqual(data['success'],False)
     
     def test_edit_Plays_request_error(self):
-        res = self.client().patch('/plays/10',headers=producer_header,json={"movie_id":1,"actor_id":3})
+        res = self.client().patch('/plays/100',headers=producer_header,json={"movie_id":1,"actor_id":3})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code,404)
