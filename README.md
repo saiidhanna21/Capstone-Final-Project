@@ -46,7 +46,7 @@ python test_flaskr.py
 ## API Reference
 
 ### Getting Started
-- Base URL: At present this app can be run locally and is hosted using heroku. The backend app is hosted at the default, `http://127.0.0.1:5000/`,  
+- Base URL: At present this app can be run locally and is hosted using heroku. The backend app is hosted at, `https://myfirstapp210.herokuapp.com/`,  
 - Authentication: Bearer token 
 
 ### Authentication 
@@ -84,7 +84,7 @@ The API will return three error types when requests fail:
     - Casting Assistant
     - Casting Director
     - Executive Producer
-- Sample: `curl -H "Authorization: Bearer ${Token}" http://127.0.0.1:5000/actors`
+- Sample: `curl -H "Authorization: Bearer ${assistant_token}" https://myfirstapp210.herokuapp.com/actors`
 
 ``` {
     "actors": [
@@ -148,7 +148,7 @@ The API will return three error types when requests fail:
     - Casting Assistant
     - Casting Director
     - Executive Producer
-- Sample: `curl -H "Authorization: Bearer ${Token}" http://127.0.0.1:5000/movies/1` 
+- Sample: `curl -H "Authorization: Bearer ${assistant_token}" https://myfirstapp210.herokuapp.com/movies/1` 
 - Note: `Token` is equal to the token mentioned in the test_app.py
 ```
 {
@@ -173,7 +173,7 @@ The API will return three error types when requests fail:
   Users with these roles
     - Casting Director
     - Executive Producer
-- Sample: `curl -X POST -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -d '{"name":"chriss","age":20,"career":"drama","projects":"c","experience":0}' http://127.0.0.1:5000/actors`
+- Sample: `curl -X POST -H "Authorization: Bearer ${director_token}" -H "Content-Type: application/json" -d '{"name":"chriss","age":20,"career":"drama","projects":"c","experience":0}' https://myfirstapp210.herokuapp.com/actors`
 ```
 {
   "actor_added": {
@@ -192,7 +192,7 @@ The API will return three error types when requests fail:
 - Who can make this request:
   Users with these roles
     - Executive Producer
-- Sample: `curl -X POST -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -d '{"name":"original","estimated_project_time":70,"need_actors":true}' http://127.0.0.1:5000/movies`
+- Sample: `curl -X POST -H "Authorization: Bearer ${producer_token}" -H "Content-Type: application/json" -d '{"name":"original","estimated_project_time":70,"need_actors":true}' https://myfirstapp210.herokuapp.com/movies`
 
 {
   "movie_added": {
@@ -215,7 +215,7 @@ The API will return three error types when requests fail:
   Users with these roles
     - Casting Director
     - Executive Producer
-- Sample: `curl -X DELETE -H "Authorization: Bearer ${token}" http://127.0.0.1:5000/actors/2`
+- Sample: `curl -X DELETE -H "Authorization: Bearer ${director_token}" https://myfirstapp210.herokuapp.com/actors/2`
 ``` 
   {
   "deleted_id": 2,
@@ -242,7 +242,7 @@ The API will return three error types when requests fail:
   Users with these roles
     - Casting Director
     - Executive Producer
-- Sample: `curl -X PATCH -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -d '{"name":"originals","estimated_project_time":50,"need_actors":false}' http://127.0.0.1:5000/movies/1`
+- Sample: `curl -X PATCH -H "Authorization: Bearer ${director_token}" -H "Content-Type: application/json" -d '{"name":"originals","estimated_project_time":50,"need_actors":false}' https://myfirstapp210.herokuapp.com/movies/1`
 ```
 {
   "updated_movie": {
